@@ -14,21 +14,21 @@ EngineWindow::~EngineWindow()
 	DestroyWindow(mHandle);
 }
 
-void EngineWindow::RegisterWindowClass(std::wstring_view _WindowName)
+void EngineWindow::RegisterWindowClass(std::wstring_view _WindowName, bool _Menu)
 {
 	WNDCLASSEXW WC = {};
 
 	WC.lpszClassName = _WindowName.data();
 	WC.style = CS_HREDRAW | CS_VREDRAW;
-	WC.cbSize = sizeof(WNDCLASSEXW);
 	WC.lpfnWndProc = EngineWindow::DefaultProc;
+	WC.lpszMenuName = nullptr;
 
+	WC.cbSize = sizeof(WNDCLASSEXW);
 	WC.hInstance = EngineCore::Core->mHInst;
 	WC.hIcon = nullptr;
 	WC.hIconSm = nullptr;
 	WC.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	WC.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	WC.lpszMenuName = nullptr;
 
 	ATOM Result = RegisterClassExW(&WC);
 	assert(Result);

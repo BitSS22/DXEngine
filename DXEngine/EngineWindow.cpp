@@ -14,9 +14,24 @@ EngineWindow::~EngineWindow()
 	DestroyWindow(mHandle);
 }
 
-bool EngineWindow::RegisterWindowClass()
+void EngineWindow::RegisterWindowClass(std::wstring_view _WindowName)
 {
-	return false;
+	WNDCLASSEXW WC = {};
+
+	WC.lpszClassName = _WindowName.data();
+	WC.style = CS_HREDRAW | CS_VREDRAW;
+	WC.cbSize = sizeof(WNDCLASSEXW);
+	WC.lpfnWndProc = EngineWindow::DefaultProc;
+
+	WC.hInstance = EngineCore::Core->mHInst;
+	WC.hIcon = nullptr;
+	WC.hIconSm = nullptr;
+	WC.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	WC.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	WC.lpszMenuName = nullptr;
+
+	ATOM Result = RegisterClassExW(&WC);
+	assert(Result);
 }
 
 EngineWindow* EngineWindow::CreateEngineWindow(std::wstring_view _WindowName, std::wstring_view _TitleName)
@@ -31,28 +46,10 @@ EngineWindow* EngineWindow::CreateEngineWindow(std::wstring_view _WindowName, st
 	HWND& WHandle = NewWindow->mHandle;
 	HINSTANCE HInst = EngineCore::Core->mHInst;
 
-	WNDCLASSEXW WC = {};
-
-	WC.cbSize = sizeof(WNDCLASSEXW);
-	WC.style = CS_HREDRAW | CS_VREDRAW;
-	WC.lpfnWndProc = EngineWindow::WndProc;
-	WC.cbClsExtra = 0;
-	WC.cbWndExtra = 0;
-	WC.hInstance = HInst;
-	WC.hIcon = nullptr;
-	WC.hCursor = LoadCursor(nullptr, IDC_ARROW);
-	WC.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	WC.lpszMenuName = nullptr;
-	WC.lpszClassName = _WindowName.data();
-	WC.hIconSm = nullptr;
-
-	ATOM Result = RegisterClassExW(&WC);
-	assert(Result);
-
 	WHandle = CreateWindowExW(0, _WindowName.data(), _TitleName.data(), WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, HInst, nullptr);
 	assert(WHandle);
-	
+
 	EngineCore::Core->mWindows.push_back(NewWindow);
 
 	return NewWindow;
@@ -162,28 +159,15 @@ EngineWindow* EngineWindow::FindEngineWindow(HWND _WindowHandle) noexcept
 	return nullptr;
 }
 
-LRESULT EngineWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT EngineWindow::DefaultProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
 	case WM_CLOSE:
-	{
 		EngineWindow* Window = FindEngineWindow(hWnd);
 		assert(Window);
-		switch (Window->mCloseAction)
-		{
-		case ECloseAction::DESTROY:
-			Window->Destroy();
-			break;
-		case ECloseAction::HIDE:
-			Window->Hide();
-			break;
-		default:
-			assert(false && "Not Definded Enum.");
-			break;
-		}
-	}
-		break;
+		Window->Destroy();
+		return 0;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}

@@ -29,7 +29,7 @@ private:
 	ECloseAction mCloseAction = ECloseAction::DESTROY;
 
 public:
-	static bool RegisterWindowClass();
+	static void RegisterWindowClass(std::wstring_view _WindowName);
 	static EngineWindow* CreateEngineWindow(std::wstring_view _WindowName, std::wstring_view _TitleName);
 	static EngineWindow* CreateEngineWindow(std::wstring_view _WindowName);
 	static EngineWindow* FindEngineWindow(std::wstring_view _WindowName) noexcept;
@@ -45,7 +45,7 @@ public:
 	void SetTransform(IntVector2 _Position, IntVector2 _Size);
 
 private:
-	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	static LRESULT DefaultProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 public:
 	void SetCloseAction(ECloseAction _Action) noexcept
